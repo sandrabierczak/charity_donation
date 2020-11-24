@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% for inst in list_cat_not_duplicate %}
+    <div class="form-group form-group--checkbox">
+                    <label>
+                        <input type="radio" name="organization" value="{{ inst.pk }}"/>
+                        <span class="checkbox radio"></span>
+                        <span class="description">
+                                  <div class="title">{{inst.name}}</div>
+                                  <div class="subtitle">
+                                    {{inst.description}}
+                                  </div>
+                                </span>
+                    </label>
+    </div>
+    {% endfor %}
+
+</body>
+</html>
+
+
+
+
