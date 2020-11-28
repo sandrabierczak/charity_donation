@@ -1,0 +1,69 @@
+{% extends 'base1.html' %}
+{% load static %}
+{% block contents %}
+<link rel="stylesheet" href="/static/css/style.css"/>
+<section class="login-page">
+    <p style="font-size:30px">Witaj {{ user.email }}</p>
+    <p style="font-size:25px">Podsumowanie ostatnio przekazanych darów:</p>
+    {% if donation %}
+    <form method="post">
+        <table>
+            <thead>
+            <tr>
+                <th scope="col" class="col-4" style="font-size:20px;">Liczba Worków</th>
+                <th scope="col" class="col-4" style="font-size:20px;">Organizacja</th>
+                <th scope="col" class="col-4" style="font-size:20px;">Kategorie</th>
+                <th scope="col" class="col-4" style="font-size:20px;">Odbiór</th>
+                <th scope="col" class="col-4" style="font-size:20px;">Potwierdź odbiór</th>
+            </tr>
+            </thead>
+            <tbody class="text-color-lighter">
+            {% for don in donation %}
+            <tr>
+                <td class="col-4" align="center">
+                    {{ don.quantity }}
+                </td>
+                <td class="col-4" align="center">
+                    {{don.institution.name}}
+                </td>
+                <td align="center">
+                    {% for category in don.categories.all %}
+                    {{ category.name }},
+                    {% endfor %}
+                </td>
+                <td class="col-4" align="center">
+                    {{ don.pick_up_date }}, godz. {{ don.pick_up_time }}
+                </td>
+                {% if don.is_taken is False %}
+                <td class="col-4" align="center">
+                    <label>
+                        <input
+                                type="checkbox"
+                                name="is_taken"
+                                value="{{ don.pk }}"
+                        />
+                        <span class="checkbox"></span>
+                        <span class="description">Czeka na odbiór</span>
+                    </label>
+                </td>
+                {% else %}
+                <td class="col-4" align="center">
+                    <p>Odebrano</p>
+                </td>
+                {% endif %}
+            </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="vertical-center">
+        <button type="submit" class="btn">Potwierdź</button>
+
+        {% csrf_token %}
+    </form>
+    <p>{{ message }}</p>
+    {% else %}
+    <p style="font-size:25px">Brak ostatnio przekazanych darów</p>
+    {% endif %}
+</section>
+{% endblock %}

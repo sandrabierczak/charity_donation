@@ -3,6 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.utils.datastructures import MultiValueDictKeyError
+
 from .models import Donation, Institution, Category
 from django.contrib.auth.models import User
 from django.views import View
@@ -13,15 +15,19 @@ class IndexView(View):
         foundations = Institution.objects.filter(type=1)
         ngos = Institution.objects.filter(type=2)
         local_collections = Institution.objects.filter(type=3)
-        quantity = Donation.objects.all().annotate(Sum('quantity'))
+        donations = Donation.objects.all()
         num_of_inst = Institution.objects.count()
-        if quantity == 0:
-            quantity = 0
+        if donations.count() == 0:
+            bags = 0
+        else:
+            bags = 0
+            for object in donations:
+                bags += object.quantity
         context = {
             "foundations": foundations,
             "ngos": ngos,
             "local_collections": local_collections,
-            "quantity": quantity,
+            "bags": bags,
             "num_of_inst": num_of_inst,
         }
         return render(request, "index.html", context)
@@ -34,7 +40,9 @@ class Register(View):
         return render(request, self.template_name)
 
     def post(self, request):
-        User.objects.create_user(request.POST['email'], request.POST['email'], request.POST['password2'])
+        User.objects.create_user(username=request.POST['email'], first_name=request.POST['name'],
+                                 last_name=request.POST['surname'],
+                                 email=request.POST['email'], password=request.POST['password2'])
         return redirect('/login')
 
 
@@ -57,12 +65,12 @@ class LogoutView(LoginRequiredMixin, View):
         return redirect('/')
 
 
-class FormConfirmation(View):
+class FormConfirmation(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, "form-confirmation.html")
 
 
-class Form(View):
+class Form(LoginRequiredMixin, View):
     def get(self, request):
         categories = Category.objects.all()
         institutions = Institution.objects.all()
@@ -88,6 +96,31 @@ class Form(View):
         donation.categories.set(categories)
         donation.save()
         return redirect('form_confirmation')
+
+
+class UserProfile(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
+        donation = Donation.objects.all().filter(user=user).order_by('is_taken', 'pick_up_date', 'pick_up_time')
+        context = {"user": user,
+                   "donation": donation}
+        return render(request, "user_profile.html", context)
+
+    def post(self, request):
+        try:
+            donation_id = int(request.POST['is_taken'])
+            update_is_taken = Donation.objects.get(pk=donation_id)
+            update_is_taken.is_taken = True
+            update_is_taken.save()
+        except MultiValueDictKeyError:
+            user = request.user
+            donation = Donation.objects.all().filter(user=user).order_by('is_taken', 'pick_up_date', 'pick_up_time')
+            context = {"user": user,
+                       "donation": donation,
+                       "message": "Zaznacz, czy odebrano"}
+            return render(request, "user_profile.html", context)
+
+        return redirect('user-profile')
 
 
 def get_institution_by_category(request):

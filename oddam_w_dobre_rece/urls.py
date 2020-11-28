@@ -17,7 +17,8 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path
-from application.views import IndexView, Login, Register, Form, LogoutView, get_institution_by_category,FormConfirmation
+from application.views import IndexView, Login, Register, Form, LogoutView, get_institution_by_category, \
+    FormConfirmation, UserProfile
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -28,4 +29,5 @@ urlpatterns = [
                   path('form/', Form.as_view(), name='test'),
                   path('form/confirmation', FormConfirmation.as_view(), name='form_confirmation'),
                   path('get_institution/', get_institution_by_category),
+                  path('profile/', UserProfile.as_view(), name='user-profile'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
