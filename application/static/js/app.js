@@ -205,7 +205,21 @@ document.addEventListener("DOMContentLoaded", function() {
         if (this.currentStep === 5){
             const bagQuantity = document.querySelector('.icon-bag').nextElementSibling;
             const bags = document.getElementsByName('bags')[0];
-            bagQuantity.innerText = `${bags.value} worków`;
+            const cat = Array.from(document.querySelectorAll('input[type=checkbox][name=categories]:checked'))
+            let checked_cat = [];
+                for (let i = 0; i < cat.length; i++) {
+                        checked_cat.push(cat[i].nextElementSibling.nextElementSibling.textContent);
+                    }
+            if (bags.value == 1){
+            bagQuantity.innerText = `${bags.value} worek kategorii: ${checked_cat}`;
+            }
+            else if ( 2<= bags.value && bags.value < 5) {
+            bagQuantity.innerText = `${bags.value} worki kategorii: ${checked_cat}`;
+            }
+            else {
+            bagQuantity.innerText = `${bags.value} worków kategorii: ${checked_cat}`;
+            }
+
             const institution = document.querySelector('input[type=radio][name=organization]:checked').nextElementSibling.nextElementSibling.children[0]
             const institution_info = document.querySelector('.icon-hand').nextElementSibling;
             institution_info.innerText = institution.textContent;
@@ -216,7 +230,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const date = document.querySelector('[name="data"]').value;
             const time = document.querySelector('[name="time"]').value;
             const more_info = document.querySelector('[name="more_info"]').value;
-            const addresslist = [street,city,postcode,phone]
             const address = Array.from(document.querySelectorAll('#address-information li'));
             const picktime = Array.from(document.querySelectorAll('#date-time li'));
             address[0].innerText = street;
